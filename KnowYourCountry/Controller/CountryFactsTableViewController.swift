@@ -10,13 +10,25 @@ import UIKit
 
 class CountryFactsTableViewController: UITableViewController {
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
+    var viewModel = CountryFactsViewModel()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        CountryFactsViewModel.fetchCountryFacts { countryFacts, error in
-            
+        tableView.estimatedRowHeight = 100
+        tableView.rowHeight = UITableView.automaticDimension
+        
+        activityIndicator.startAnimating()
+        
+        viewModel.fetchCountryFacts { [weak self] error in
+            guard let weakSelf = self else { return }
+
             DispatchQueue.main.async {
-                self.title = countryFacts?.title
+                weakSelf.activityIndicator.stopAnimating()
+                weakSelf.title = weakSelf.viewModel.title
+                weakSelf.tableView.reloadData()
             }
         }
     }
@@ -25,15 +37,17 @@ class CountryFactsTableViewController: UITableViewController {
 extension CountryFactsTableViewController {
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 0
+        return viewModel.numberOfSections()
     }
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return viewModel.numberOfRowsInSection(section)
     }
-
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        return UITableViewCell()
+        let cell = tableView.dequeueReusableCell(withIdentifier: TableCellIdentifier.countryFactsCellId, for: indexPath)
+        cell.textLabel?.text = viewModel.countryInfo?[indexPath.row].title
+        cell.detailTextLabel?.text = viewModel.countryInfo?[indexPath.row].description
+        return cell
     }
 }

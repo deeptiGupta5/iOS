@@ -10,18 +10,40 @@ import Foundation
 
 class CountryFactsViewModel {
     
-    static func fetchCountryFacts(completionHandler: @escaping (CountryFacts?, Error?)->(Void)) {
-        ServiceManager.getCountryFacts { (data, error) in
+    var title: String?
+    var countryInfo: [CountryInfo]?
+    
+    /// Fetch Country Facts from server
+    /// - Parameter completionHandler: closure to mark the response/error recieved
+    func fetchCountryFacts(networkType: NETWORKTYPE = .API, completionHandler: @escaping (Error?)->(Void)) {
+        let serviceManger = ServiceManager(networkType: networkType)
+        serviceManger.getCountryFacts { [weak self] (data, error) in
+            guard let weakSelf = self else { return }
             if error != nil {
-                completionHandler(nil, error)
+                completionHandler(error)
             } else if let responseData = data {
                 do {
                     let countryFacts: CountryFacts = try JSONDecoder().decode(CountryFacts.self, from: responseData)
-                    completionHandler(countryFacts, nil)
+                    weakSelf.title = countryFacts.title
+                    weakSelf.countryInfo = countryFacts.rows
+                    completionHandler(nil)
                 } catch let error {
                     print(error.localizedDescription)
                 }
             }
         }
+    }
+    
+    /// Return number of sections for table
+    /// - Returns: section count
+    func numberOfSections() -> Int {
+        return CountryFactsContants.countryFactsTableSection
+    }
+    
+    /// Return number of rows in a section for table
+    /// - Parameter section: table section
+    /// - Returns: row count in the passed section
+    func numberOfRowsInSection(_ section: Int) -> Int {
+        return countryInfo?.count ?? CountryFactsContants.zero
     }
 }

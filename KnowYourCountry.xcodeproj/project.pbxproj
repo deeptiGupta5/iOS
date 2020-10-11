@@ -19,6 +19,7 @@
 		7978E46825335D3C00F08561 /* CountryFactsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7978E46725335D3C00F08561 /* CountryFactsViewModel.swift */; };
 		7978E46A25335DFD00F08561 /* CountryFacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7978E46925335DFD00F08561 /* CountryFacts.swift */; };
 		7978E46C2533706E00F08561 /* CountryFactsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7978E46B2533706E00F08561 /* CountryFactsTableViewController.swift */; };
+		7978E46E25337BEB00F08561 /* CountryFacts.json in Resources */ = {isa = PBXBuildFile; fileRef = 7978E46D25337BEB00F08561 /* CountryFacts.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		7978E46725335D3C00F08561 /* CountryFactsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryFactsViewModel.swift; sourceTree = "<group>"; };
 		7978E46925335DFD00F08561 /* CountryFacts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryFacts.swift; sourceTree = "<group>"; };
 		7978E46B2533706E00F08561 /* CountryFactsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryFactsTableViewController.swift; sourceTree = "<group>"; };
+		7978E46D25337BEB00F08561 /* CountryFacts.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = CountryFacts.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -174,6 +176,7 @@
 		7978E46125335A4000F08561 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				7978E46D25337BEB00F08561 /* CountryFacts.json */,
 				7978E43325335A0100F08561 /* Main.storyboard */,
 				7978E46525335AFE00F08561 /* Constants.swift */,
 			);
@@ -294,6 +297,7 @@
 			files = (
 				7978E43A25335A0300F08561 /* LaunchScreen.storyboard in Resources */,
 				7978E43725335A0300F08561 /* Assets.xcassets in Resources */,
+				7978E46E25337BEB00F08561 /* CountryFacts.json in Resources */,
 				7978E43525335A0100F08561 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

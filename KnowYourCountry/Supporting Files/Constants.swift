@@ -11,3 +11,12 @@ import Foundation
 struct APIEndpoint {
     static let countryFacts = "https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl/facts.json"
 }
+
+struct TableCellIdentifier {
+    static let countryFactsCellId = "CountryFacts"
+}
+
+struct CountryFactsContants {
+    static let countryFactsTableSection = 1
+    static let zero = 0
+}
