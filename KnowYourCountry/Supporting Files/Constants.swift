@@ -13,7 +13,7 @@ struct APIEndpoint {
 }
 
 struct TableCellIdentifier {
-    static let countryFactsCellId = "CountryFacts"
+    static let countryFactsCellId = "CountryFactsTableViewCell"
 }
 
 struct CountryFactsContants {

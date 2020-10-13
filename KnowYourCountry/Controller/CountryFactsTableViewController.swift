@@ -7,9 +7,9 @@
 //
 
 import UIKit
+import Kingfisher
 
 class CountryFactsTableViewController: UITableViewController {
-    
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     var viewModel = CountryFactsViewModel()
@@ -17,11 +17,18 @@ class CountryFactsTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.estimatedRowHeight = 100
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+        
+        tableView.estimatedRowHeight = 600
         tableView.rowHeight = UITableView.automaticDimension
         
         activityIndicator.startAnimating()
-        
+        fetchTableData()
+    }
+    
+    private func fetchTableData() {
         viewModel.fetchCountryFacts { [weak self] error in
             guard let weakSelf = self else { return }
 
@@ -29,8 +36,13 @@ class CountryFactsTableViewController: UITableViewController {
                 weakSelf.activityIndicator.stopAnimating()
                 weakSelf.title = weakSelf.viewModel.title
                 weakSelf.tableView.reloadData()
+                weakSelf.tableView.refreshControl?.endRefreshing()
             }
         }
+    }
+    
+    @objc private func refreshData() {
+        fetchTableData()
     }
 }
 
@@ -44,10 +56,20 @@ extension CountryFactsTableViewController {
         return viewModel.numberOfRowsInSection(section)
     }
     
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: TableCellIdentifier.countryFactsCellId, for: indexPath)
-        cell.textLabel?.text = viewModel.countryInfo?[indexPath.row].title
-        cell.detailTextLabel?.text = viewModel.countryInfo?[indexPath.row].description
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TableCellIdentifier.countryFactsCellId, for: indexPath) as? CountryFactsTableViewCell else { return UITableViewCell() }
+        cell.titleLabel.text = viewModel.countryInfo?[indexPath.row].title
+        cell.descriptionLabel.text = viewModel.countryInfo?[indexPath.row].description
+        cell.cellImageView?.image = nil
+        
+        if let imageURLString = viewModel.countryInfo?[indexPath.row].imageHref, let imageURL = URL(string: imageURLString) {
+            let resource = ImageResource(downloadURL: imageURL, cacheKey: imageURL.absoluteString)
+            cell.cellImageView?.kf.setImage(with: resource, options: [.transition(.fade(0.2)), .cacheOriginalImage])
+        }
         return cell
     }
 }
