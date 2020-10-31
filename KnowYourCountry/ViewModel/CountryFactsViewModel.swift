@@ -28,7 +28,7 @@ class CountryFactsViewModel {
                     weakSelf.countryInfo = countryFacts.rows
                     completionHandler(nil)
                 } catch let error {
-                    print(error.localizedDescription)
+                    completionHandler(error)
                 }
             }
         }

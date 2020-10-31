@@ -9,34 +9,84 @@
 import UIKit
 import Kingfisher
 
-class CountryFactsTableViewController: UITableViewController {
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+class CountryFactsTableViewController: UIViewController {
+    
+    private var activityIndicator: UIActivityIndicatorView! = {
+       let activityIndicatorView = UIActivityIndicatorView(style: .medium)
+        activityIndicatorView.hidesWhenStopped = true
+        return activityIndicatorView
+    }()
+    
+    private let tableView: UITableView = {
+        let tableview = UITableView()
+        tableview.backgroundColor = UIColor.white
+        tableview.translatesAutoresizingMaskIntoConstraints = false
+        tableview.allowsSelection = false
+        return tableview
+    }()
     
     var viewModel = CountryFactsViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupTableView()
+        setupRefreshControl()
+        setupActivityIndicator()
+        
+        fetchTableData()
+    }
+    
+    private func setupTableView() {
+        tableView.estimatedRowHeight = CountryFactsContants.estimatedRowHeight
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.register(CountryFactsTableViewCell.self, forCellReuseIdentifier: TableCellIdentifier.countryFactsCellId)
+        
+        self.view.addSubview(tableView)
+        
+        tableView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+        tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        tableView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+        tableView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+        
+        tableView.dataSource = self
+        tableView.delegate = self
+    }
+    
+    private func setupRefreshControl() {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         tableView.refreshControl = refreshControl
-        
-        tableView.estimatedRowHeight = 600
-        tableView.rowHeight = UITableView.automaticDimension
-        
+    }
+    
+    private func setupActivityIndicator() {
+        activityIndicator.center = self.view.center
+        tableView.addSubview(activityIndicator)
         activityIndicator.startAnimating()
-        fetchTableData()
+    }
+    
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
     
     private func fetchTableData() {
         viewModel.fetchCountryFacts { [weak self] error in
             guard let weakSelf = self else { return }
 
-            DispatchQueue.main.async {
-                weakSelf.activityIndicator.stopAnimating()
-                weakSelf.title = weakSelf.viewModel.title
-                weakSelf.tableView.reloadData()
-                weakSelf.tableView.refreshControl?.endRefreshing()
+            if let errorMessage = error {
+                DispatchQueue.main.async {
+                    weakSelf.activityIndicator.stopAnimating()
+                    weakSelf.showErrorAlert(message: errorMessage.localizedDescription)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    weakSelf.activityIndicator.stopAnimating()
+                    weakSelf.title = weakSelf.viewModel.title
+                    weakSelf.tableView.reloadData()
+                    weakSelf.tableView.refreshControl?.endRefreshing()
+                }
             }
         }
     }
@@ -46,30 +96,30 @@ class CountryFactsTableViewController: UITableViewController {
     }
 }
 
-extension CountryFactsTableViewController {
+extension CountryFactsTableViewController: UITableViewDelegate, UITableViewDataSource {
     
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return viewModel.numberOfSections()
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.numberOfRowsInSection(section)
     }
     
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableView.automaticDimension
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TableCellIdentifier.countryFactsCellId, for: indexPath) as? CountryFactsTableViewCell else { return UITableViewCell() }
+        
         cell.titleLabel.text = viewModel.countryInfo?[indexPath.row].title
         cell.descriptionLabel.text = viewModel.countryInfo?[indexPath.row].description
-        cell.cellImageView?.image = nil
-        
+        cell.cellImageView.image = nil
+
         if let imageURLString = viewModel.countryInfo?[indexPath.row].imageHref, let imageURL = URL(string: imageURLString) {
             let resource = ImageResource(downloadURL: imageURL, cacheKey: imageURL.absoluteString)
-            cell.cellImageView?.kf.setImage(with: resource, options: [.transition(.fade(0.2)), .cacheOriginalImage])
+            cell.cellImageView.kf.setImage(with: resource, placeholder: #imageLiteral(resourceName: "no-image"), options: [.transition(.fade(0.2)), .cacheOriginalImage])
+        } else {
+            cell.cellImageView.image = #imageLiteral(resourceName: "no-image")
         }
+        
         return cell
     }
 }
